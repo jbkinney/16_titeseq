@@ -134,7 +134,7 @@ def plot_KD_compare(lib1, lib2, ax, make_colorbar=False):
         cbar.set_label(r'density',labelpad=2)
     
     #usethis = np.isfinite(KD1) & np.isfinite(KD2)
-    [my_corr, pval] = spearmanr(KD1[usethis], KD2[usethis])
+    [my_corr, pval] = pearsonr(KD1[usethis], KD2[usethis])
     
     
     ax.text(-7.25,-9, r'$r=%0.2f$'%(my_corr), zorder=20)
@@ -168,23 +168,26 @@ def plot_expression_compare(lib1, lib2, ax, make_colorbar=False):
     wt_mE2 = np.nanmedian(lib2['expression'][wt_ind2])
     
     
-    for k1,k3, mE in zip(lib1['CDR1H'],lib1['CDR3H'], lib1['expression']):
-        pairs[k1+k3] = [mE, np.nan]
+    for k1,k3, mE, E in zip(lib1['CDR1H'],lib1['CDR3H'], lib1['expression'], np.array(lib1[['prob_cmyc0','prob_cmyc1','prob_cmyc2','prob_cmyc3']])):
+        pairs[k1+k3] = [mE, np.nan, (E), np.ones(4)*np.nan ]
             
-    for k1,k3, mE in zip(lib2['CDR1H'],lib2['CDR3H'], lib2['expression']):
+    for k1,k3, mE, E in zip(lib2['CDR1H'],lib2['CDR3H'], lib2['expression'], np.array(lib2[['prob_cmyc0','prob_cmyc1','prob_cmyc2','prob_cmyc3']])):
         if k1+k3 not in pairs:
-            pairs[k1+k3] = [np.nan, mE]
+            pairs[k1+k3] = [np.nan, mE, np.ones(4)*np.nan, (E)]
         else:
             pairs[k1+k3][1] = mE
+            pairs[k1+k3][3] = (E)#-np.sum(E*np.log(E+(E==0)))
 
     mE1 = np.array([v[0] for v in pairs.values()])/wt_mE1
     mE2 = np.array([v[1] for v in pairs.values()])/wt_mE2
+    E1 = np.array([v[2].tolist() for v in pairs.values()])
+    E2 = np.array([v[3].tolist() for v in pairs.values()])
+    
     mE1[mE1>lims[1]]=lims[1]
     mE2[mE2>lims[1]]=lims[1]
-
-    usethis = np.isfinite(mE1) & np.isfinite(mE2)# & (mE1<2) & (mE2<2)
+    usethis = np.isfinite(mE1) & np.isfinite(mE2) & (np.min(E1, axis=1)>0) & (np.min(E2, axis=1) >0)#& (mE1<2) & (mE2<2)
     nbins = 32
-    [my_corr, pval] = spearmanr(mE1[usethis], mE2[usethis])
+    [my_corr, pval] = pearsonr(mE1[usethis], mE2[usethis])
     H, xedges, yedges = np.histogram2d(
         mE1[usethis].flatten(), 
         mE2[usethis].flatten(),
