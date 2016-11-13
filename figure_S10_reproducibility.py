@@ -4,7 +4,7 @@ import matplotlib as mpl
 import matplotlib.pyplot as plt
 import numpy as np
 import pdb
-from scipy.stats import pearsonr, spearmanr
+from scipy.stats import pearsonr
 from matplotlib.colors import LogNorm
 import pandas
 from helper import *
@@ -70,7 +70,7 @@ def plot_KD_z_compare(lib1, lib2, ax):
     freq, bins = np.histogram(z, np.linspace(-6,6, 24))
     ax.plot(bins[:-1], freq/float(np.sum(freq)))
 
-def plot_KD_compare(lib1, lib2, ax, make_colorbar=False):
+def plot_KD_compare(lib1, lib2, ax, f, make_colorbar=False):
     # Use global zorder variable
     #global zorder
     # Always do this when plotting on a specified axis
@@ -136,8 +136,10 @@ def plot_KD_compare(lib1, lib2, ax, make_colorbar=False):
     #usethis = np.isfinite(KD1) & np.isfinite(KD2)
     [my_corr, pval] = pearsonr(KD1[usethis], KD2[usethis])
     
-    
-    ax.text(-7.25,-9, r'$r=%0.2f$'%(my_corr), zorder=20)
+    #caption = r'$r^2=%0.2f, f=%d$'%(my_corr**2,f*100)
+    ax.text(-7,-8.5, r'$r=%0.2f$'%(my_corr), zorder=20) 
+    ax.text(-7,-9, r'$f=%d$'%(f*100)+'\%', zorder=20)
+    #ax.text(-7.25,-9, caption, zorder=20)
     ticks = [-10,-9, -8, -7, -6, -5]
     tick_labels = [r'$10^{-10}$',r'$10^{-9}$',r'$10^{-8}$',r'$10^{-7}$',r'$10^{-6}$',r'$10^{-5}$']
     ax.set_xticks(ticks)
@@ -153,7 +155,7 @@ def plot_KD_compare(lib1, lib2, ax, make_colorbar=False):
     ax.plot(log_bounds, log_bounds, '--', c='k')
     
 
-def plot_expression_compare(lib1, lib2, ax, make_colorbar=False):
+def plot_expression_compare(lib1, lib2, ax, f, make_colorbar=False):
 
     
     # Always do this when plotting on a specified axis
@@ -225,7 +227,8 @@ def plot_expression_compare(lib1, lib2, ax, make_colorbar=False):
         cbar.set_label(r'density',labelpad=2)
     #pdb.set_trace()
     #[my_corr, pval] = pearsonr(mE1[usethis], mE2[usethis])
-    ax.text(0.1, 1.7, r'$r=$'+str(np.round(my_corr,2)), zorder=20) 
+    ax.text(1.2, 0.4, r'$r=%0.2f$'%(my_corr), zorder=20) 
+    ax.text(1.2, 0.2, r'$f=%d$'%(f*100)+'\%', zorder=20)
     
     #labeler.label_subplot(ax,'B')
     
@@ -251,20 +254,29 @@ plt.subplots_adjust(
 # Make a labler to add labels to subplots
 labeler = Labeler(xpad=.05,ypad=.01,fontsize=10)
 
+frac_dict= {
+'A1':0.990494296578,
+'B1':0.828897338403,
+'A2':0.977457903313,
+'B2':0.779467680608,
+'A3':0.979625101874,
+'B3':0.804672643303
+}
+
 # Panel A
 ax = axes[0,0]
-plot_KD_compare(rep1, rep3, ax)
+plot_KD_compare(rep1, rep3, ax, f=frac_dict['A1'])
 labeler.label_subplot(ax,'A')
 ax.set_ylabel('$K_D$ [M], replicate 1', labelpad=2)
 ax.set_xlabel('$K_D$ [M], replicate 3', labelpad=2)
 #ax.set_aspect(1.)
 
 ax = axes[1,0]
-plot_expression_compare(rep1, rep3, ax)
+plot_expression_compare(rep1, rep3, ax, f=frac_dict['B1'])
 labeler.label_subplot(ax,'B')
 #ax.set_aspect(1.)
-ax.set_ylabel('expression, replicate 1', labelpad=2)
-ax.set_xlabel('expression, replicate 3', labelpad=2)
+ax.set_ylabel('$E$ [au], replicate 1', labelpad=2)
+ax.set_xlabel('$E$ [au], replicate 3', labelpad=2)
 
   
 #ax = axes[2,0]
@@ -275,7 +287,7 @@ ax.set_xlabel('expression, replicate 3', labelpad=2)
 #ax.set_aspect(12./0.7)
 
 ax = axes[0,1]
-plot_KD_compare(rep1, rep2, ax)
+plot_KD_compare(rep1, rep2, ax, f=frac_dict['A2'])
 ax.set_ylabel('$K_D$ [M], replicate 1', labelpad=2)
 ax.set_xlabel('$K_D$ [M], replicate 2', labelpad=2)
 
@@ -283,9 +295,9 @@ ax.set_xlabel('$K_D$ [M], replicate 2', labelpad=2)
 
 
 ax = axes[1,1]
-plot_expression_compare(rep1, rep2, ax)
-ax.set_ylabel('expression, replicate 1', labelpad=2)
-ax.set_xlabel('expression, replicate 2', labelpad=2)
+plot_expression_compare(rep1, rep2, ax, f=frac_dict['B2'])
+ax.set_ylabel('$E$ [au], replicate 1', labelpad=2)
+ax.set_xlabel('$E$ [au], replicate 2', labelpad=2)
 #ax.set_aspect(1.)
 
   
@@ -298,16 +310,16 @@ ax.set_xlabel('expression, replicate 2', labelpad=2)
 
 
 ax = axes[0,2]
-plot_KD_compare(rep3, rep2, ax, make_colorbar=True)
+plot_KD_compare(rep3, rep2, ax, f=frac_dict['A3'], make_colorbar=True)
 ax.set_ylabel('$K_D$ [M], replicate 3', labelpad=2)
 ax.set_xlabel('$K_D$ [M], replicate 2', labelpad=2)
 #ax.set_aspect(1.)
 
 
 ax = axes[1,2]
-plot_expression_compare(rep3, rep2, ax, make_colorbar=True)
-ax.set_ylabel('expression, replicate 3', labelpad=2)
-ax.set_xlabel('expression, replicate 2', labelpad=2)
+plot_expression_compare(rep3, rep2, ax, f=frac_dict['B3'], make_colorbar=True)
+ax.set_ylabel('$E$ [au], replicate 3', labelpad=2)
+ax.set_xlabel('$E$ [au], replicate 2', labelpad=2)
 
 
 #ax = axes[2,2]
