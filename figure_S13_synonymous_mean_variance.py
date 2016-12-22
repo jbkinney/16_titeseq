@@ -220,8 +220,8 @@ print "B1"
 ax = axes[1,0]
 plot_expression_compare(rep1, ax)
 labeler.label_subplot(ax,'B')
-ax.set_ylabel('standard deviation, expression', labelpad=2)
-ax.set_xlabel(r'average expression', labelpad=2)
+ax.set_ylabel('standard deviation, $E$', labelpad=2)
+ax.set_xlabel(r'average $E$', labelpad=2)
 
 print "A2"
 ax = axes[0,1]
@@ -231,7 +231,7 @@ ax.set_xlabel(r'average log$_{10} K_D$', labelpad=2)
 print "B2"
 ax = axes[1,1]
 plot_expression_compare(rep2, ax)
-ax.set_xlabel(r'average expression', labelpad=2)
+ax.set_xlabel(r'average $E$', labelpad=2)
 
 print "A3"
 ax = axes[0,2]
@@ -241,7 +241,7 @@ ax.set_xlabel(r'average log$_{10} K_D$', labelpad=2)
 print "B3"
 ax = axes[1,2]
 plot_expression_compare(rep3, ax, make_colorbar=True)
-ax.set_xlabel(r'average expression', labelpad=2)
+ax.set_xlabel(r'average $E$', labelpad=2)
 
 '''p3 = axes[2,1].get_position().get_points()
 x00, y0 = p3[0]
