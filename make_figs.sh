@@ -45,3 +45,6 @@ python figure_S11_composition.py
 echo 'Running figure_S12_multipoint.py...'
 python figure_S12_multipoint.py
 
+echo 'Running figure_S13_synonymous_mean_variance.py...'
+python figure_S13_synonymous_mean_variance.py
+
