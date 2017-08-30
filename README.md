@@ -1,6 +1,6 @@
 # 16_titeseq
 Processed data and analysis code for Adams et al., 2016 bioRxiv (http://www.biorxiv.org/content/early/2016/11/15/036335)  
-##Data generation
+## Data generation
 To generate data based figures, run:  
 ```
 ./make_figs.sh
@@ -22,7 +22,7 @@ I then used the command ray 800,800 to generate the png figure.
 
 The pymol scipt may not run if there are any " " characters in the filename.  
 
-##Processed data  
+## Processed data  
 Processed experimental data is stored in ./data  
 Annotation for data follows:  
 all_aas.txt - txt file of atoms in the 4-4-20 crystal structure  
@@ -31,13 +31,20 @@ bar_codes.xlsx - barcodes used in the tite-seq replicate experiments + which cel
 
 CDR_library_July_5_2013_sequences.txt - list of CDR1H and CDR3H mutations used to create library.  
 
-CDR1and3_Feb23_2015_pJK36_001.fcs - flow cytometry measurements of wt yeast displayed antibodies measured under saturating conditions.   
+CDR1and3_Feb23_2015_pJK36_001.fcs - flow cytometry measurements of wt yeast displayed antibodies measured under saturating conditions.  
+
 CDR1and3_Feb23_2015_pJK37_001_003.fcs - flow cytometry measurements of opt antibodies measured under saturating conditions.  
+
 CDR1and3_Feb27_2015_pJK36_001.fcs - flow cytometry measurements of wt yeast displayed antibodies measured under saturating conditions. shown in figure S5.  
+
 CDR1and3_Feb27_2015_pJK37_001_003.fcs - flow cytometry measurements of opt antibodies measured under saturating conditions. shown in figure S5.  
+
 CDR1and3_Mar3_2015_pJK36_001.fcs - flow cytometry measurements of wt yeast displayed antibodies measured under saturating conditions.   
+
 CDR1and3_Mar3_2015_pJK37_001_003.fcs  
+
 CDR3_Feb12_2015_pJK36_001.fcs - flow cytometry measurements of opt antibodies measured under saturating conditions.  
+
 CDR3_Feb12_2015_pJK37_002.fcs - flow cytometry measurements of wt yeast displayed antibodies measured under saturating conditions.   
 
 CDR13_positions.txt - positions of just CDR1 and CDR3H atoms in the crystal structure. Shown in figure 6.  
@@ -60,7 +67,7 @@ sort_counts_16.4.21.txt - FACS cell sort counts for third replicate. Shown in fi
 
 titration_curves.csv - flow cytometry titration curves and KD fits for isolated clones. Shown in figure 4, S6  
 
-##Testing the fitting algorithm on simulated tite-seq data
+## Testing the fitting algorithm on simulated tite-seq data
 
 To generate the fitting simulations for figure S8, run:  
 ```
@@ -72,14 +79,14 @@ The output of these files are saved in ./data/ideal_0_0.001.csv
 ./data/ideal_0_1.0.csv  
 ./data/ideal_0_10000.0.csv  
 
-respectively. The first input argument (0) specifices the tite-seq replicate to simulate. This can be 0, 1, or 2. The second input argument specifices the sampling rate of the experiment. Higher numbers decrease the variability of fits. Each round of simulation fitting took 5 days to complate on the blacknblue cluster at Cold Spring Harbor Laboratory, August 2016. 
+respectively. The first input argument (0) specifices the tite-seq replicate to simulate. This can be 0, 1, or 2. The second input argument specifices the sampling rate of the experiment. Higher numbers decrease the variability of fits. Each round of simulation fitting took 5 days to complate on the blacknblue cluster at Cold Spring Harbor Laboratory, August 2016.
 
 ##Running the binding affinity algorithm
 
 To run the KD inference algorithm, you can  
 ```
 import x_star from KD_fit_log_poiss
-``` 
+```
 
 in a python script, or you can run a this script as  
 ```
@@ -90,4 +97,3 @@ The input.dat file is fairly structured, an example of how to create one is crea
 python KD_fit_log_poiss.py
 ```
 without any inputs. Default test simulation figures are stored in ./fits/.
-
