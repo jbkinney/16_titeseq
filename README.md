@@ -87,16 +87,16 @@ respectively. The first input argument (0) specifices the tite-seq replicate to 
 
 ## Running the binding affinity algorithm
 
-To run the KD inference algorithm, you can  
+To run the KD inference algorithm, you can include the line   
 ```
 import x_star from KD_fit_log_poiss
 ```
 
-in a python script, or you can run a this script as  
+in a python script, or you can run this script as  
 ```
 python KD_fit_log_poiss.py input.dat output.dat
 ```
-The input.dat file is fairly structured, an example of how to create one is created as example.dat when you run  
+The input.dat file is fairly structured. An example of how to create one is created as example.dat when you run  
 ```
 python KD_fit_log_poiss.py
 ```
