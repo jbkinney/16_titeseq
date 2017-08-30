@@ -18,7 +18,11 @@ Then,
 Open pymol  
 From pymol open ./structure/figure_6.pse  
 Run ./structure/pymol_color.py  
-I then used the command ray 800,800 to generate the png figure.  
+I then used the command
+```
+ray 800,800
+```
+to generate the png figure.  
 
 The pymol scipt may not run if there are any " " characters in the filename.  
 
