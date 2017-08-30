@@ -45,7 +45,7 @@ CDR1and3_Feb27_2015_pJK37_001_003.fcs - flow cytometry measurements of opt antib
 
 CDR1and3_Mar3_2015_pJK36_001.fcs - flow cytometry measurements of wt yeast displayed antibodies measured under saturating conditions.   
 
-CDR1and3_Mar3_2015_pJK37_001_003.fcs  
+CDR1and3_Mar3_2015_pJK37_001_003.fcs  - flow cytometry measurements of super-optimized (OPT) yeast displayed antibodies measured under saturating conditions.   
 
 CDR3_Feb12_2015_pJK36_001.fcs - flow cytometry measurements of opt antibodies measured under saturating conditions.  
 
@@ -85,7 +85,7 @@ The output of these files are saved in ./data/ideal_0_0.001.csv
 
 respectively. The first input argument (0) specifices the tite-seq replicate to simulate. This can be 0, 1, or 2. The second input argument specifices the sampling rate of the experiment. Higher numbers decrease the variability of fits. Each round of simulation fitting took 5 days to complate on the blacknblue cluster at Cold Spring Harbor Laboratory, August 2016.
 
-##Running the binding affinity algorithm
+## Running the binding affinity algorithm
 
 To run the KD inference algorithm, you can  
 ```
