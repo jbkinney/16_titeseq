@@ -5,41 +5,8 @@ import matplotlib.pyplot as plt
 from scipy.interpolate import Akima1DInterpolator, UnivariateSpline
 import sys
 import pickle
+from ratio_x import ratio_x
 import copy
-import os
-import errno
-
-def ratio_x(R,T,S):
-    """R- aXb numpy array for the number of reads for seqeunce s, where a is number of antigen concentrations, b is the number of bins.
-    T- aXb numpy array total number of reads
-    S- aXb numpy array of the number cells sorted
-    
-    output - 
-    x_guess - aXb numpy array of estimates of the fraction of cells with sequence s sorted into each bin at each antigen exposure
-    k_guess - estimate of the fraction of population with sequence s
-    b - aXb numpy array of coefficients relating sequence counts to sorted cells
-    k_std - estimate of the standard deviation of log-transformed fraction of population with sequence s
-    """
-    b = np.array([(np.sum(sorts)/sorts).tolist() for sorts in S])
-    x_guess = (R*(1./T)/b)
-    k_guess = np.nansum(x_guess, axis=1)
-    df = np.sum(k_guess>0)
-    if df > 1:
-        k_std = np.exp(np.nanstd(np.log(k_guess[k_guess>0]))/np.sqrt(df))
-    else:
-        k_std = np.exp(1)
-        
-    k_guess = np.exp(np.nanmean(np.log(k_guess[k_guess>0])))
-    return x_guess, k_guess, b, k_std
-
-def mkdir_p(path):
-    try:
-        os.makedirs(path)
-    except OSError as exc:  # Python >2.5
-        if exc.errno == errno.EEXIST and os.path.isdir(path):
-            pass
-        else:
-            raise
 
 def project_points(x, y, z, a, b, c):
     """
@@ -141,21 +108,47 @@ def getML(x0, R,T,b,k,c, mu):
 
 def closest_legit_x(x1, curr_mu, c, k):
     """internal function, finds the closest x value from x1 that satisfies constraints mean = mu, fraction = k"""
-    if np.sum(x1<0):
-        logc = np.log10(c)
-        pfun = lambda a: np.exp(-a*logc)/np.sum(np.exp(-a*logc))
-        o = lambda a: (np.log10(curr_mu)-pfun(a).dot(logc))**2
-        fit = minimize(o, 1, method='nelder-mead',tol = 1e-20)
-        a = fit['x']
-        x0 = pfun(a)
-        x0*=k
+    try:
+        
+        if np.sum(x1<0):
+            logc = np.log10(c)
+            pfun = lambda a: np.exp(-a*logc)/np.sum(np.exp(-a*logc))
+            o = lambda a: (np.log10(curr_mu)-pfun(a).dot(logc))**2
+            fit = minimize(o, 1, method='nelder-mead',tol = 1e-20)
+            a = fit['x']
+            x0 = pfun(a)
+            x0*=k
     
-        dx = x0 - x1
-        gammas = x0/dx
-        gammas = gammas[gammas>=0]
-        gamma = np.min(gammas)*(1-1e-6)
-        x1 = x0 - gamma * dx
-        x1*=k/x1.sum()
+            dx = x0 - x1
+            gammas = x0/dx
+            gammas = gammas[gammas>=0]
+            gamma = np.min(gammas)*(1-1e-6)
+            x1 = x0 - gamma * dx
+            x1*=k/x1.sum()
+
+    except:
+        print 'invalid x1'
+        print x1
+
+    try:
+        if np.sum(x1<0):
+            logc = np.log10(c)
+            pfun = lambda a: np.exp(-a*logc)/np.sum(np.exp(-a*logc))
+            o = lambda a: (np.log10(curr_mu)-pfun(a).dot(logc))**2
+            fit = minimize(o, 1, method='nelder-mead',tol = 1e-20)
+            a = fit['x']
+            x0 = pfun(a)
+            x0*=k
+    
+            dx = x0 - x1
+            gammas = x0/dx
+            gammas = gammas[gammas>=0]
+            gamma = np.min(gammas)*(1-1e-6)
+            x1 = x0 - gamma * dx
+            x1*=k/x1.sum()
+    except:
+        print 'inalid x1'
+    print x1
     return x1
 
 
@@ -406,7 +399,7 @@ def test():
         fid.close()
         
         best_LL =np.inf
-        k_scan = np.logspace(np.log10(k_guess) - 6*np.log10(k_std), np.log10(k_guess)+6*np.log10(k_std),5)
+        k_scan = np.logspace(np.log10(k_guess) - 6*np.log10(k_std), np.log10(k_guess)+6*np.log10(k_std),25)
         print 'k: '+str(k)+' guessed k: '+ str(k_guess) + 'k error: ' + str(np.abs(k-k_guess)/k)
         
         x, KD, s, KD_sigma, get_obj, prob, log_prob, try_LL, k_guess = x_star(R, T, b, k_scan, c, basal, KD_scan, s_scan, fl)
@@ -434,14 +427,25 @@ def test():
         
         print 'Fit KD: ' + str(fitk[-1]) + ' true KD: ' + str(true_K[-1])
         print 'Fit x: ' + str(bSSE[-1]) +' Naive x: '+str(rSSE[-1])
-        mkdir_p('fit')
+        
         error = [(np.log(tk)-np.log(fk))/kstd for tk,fk,kstd in zip(true_K, fitk, stds)]
         fig = plt.figure()
         ax = fig.add_axes([.18, .18, .75, .75])
         ax.hist(error, np.linspace(-10,10,40), normed=1)
-        plt.ylabel(r'frequency')
-        plt.xlabel(r'(true_KD - fit_KD)/error')
+        plt.ylabel('frequency')
+        plt.xlabel('(true_KD - fit_KD)/error')
         plt.savefig('./fit/KD_error_dist.pdf')
+        plt.close()
+        
+        
+        fig = plt.figure()
+        ax = fig.add_axes([.18, .18, .75, .75])
+        ax.loglog(bSSE, rSSE,'.')
+        ax.loglog([np.min(bSSE),np.max(bSSE)],[np.min(bSSE),np.max(bSSE)])
+        plt.ylabel('ratio SSE')
+        plt.xlabel('poisson SSE')
+        plt.text(1e-8,1e-6,' log10 poisson SSE -  log10 ratio SSE:\n '+ str(np.round(np.mean(log_delta),3)))
+        plt.savefig('./fit/smooth_poiss_x_fit.pdf')
         plt.close()
 
         sizes = 1./(np.array(stds)+.01)+0.1
@@ -452,8 +456,8 @@ def test():
         ax.loglog([1e-10,10**-4],[1e-10,10**-4])
         plt.xscale('log')
         plt.yscale('log')
-        plt.xlabel(r'true KD')
-        plt.ylabel(r'fit KD')
+        plt.xlabel('true KD')
+        plt.ylabel('fit KD')
         plt.savefig('./fit/smooth_poiss_KD_fit.pdf')
         plt.close()
     
@@ -461,8 +465,8 @@ def test():
         ax = fig.add_axes([.18, .18, .75, .75])
         ax.errorbar(np.log10(np.array(true_K)), np.log10(np.array(fitk)), yerr=stds,fmt='o')
         ax.plot([-10,-4],[-10,-4])
-        plt.xlabel(r'log true KD')
-        plt.ylabel(r'log fit KD')
+        plt.xlabel('log true KD')
+        plt.ylabel('log fit KD')
         ax.set_xlim([-10,-4])
         ax.set_ylim([-10,-4])
         plt.savefig('./fit/smooth_poiss_KD_error.pdf')
@@ -473,11 +477,11 @@ def test():
         H, xedges, yedges = np.histogram2d(np.log10(np.array(true_K)),np.log10(fitk),bins = (np.linspace(-10,-4, 51),np.linspace(-10, -4, 50)))
         cax= ax.pcolor(yedges[1:], xedges[1:],H)
         ax.plot([-10,-4],[-10,-4],'k')
-        plt.xlabel(r'fit log10 KD')
-        plt.ylabel(r'true log10 KD')
+        plt.xlabel('fit log10 KD')
+        plt.ylabel('true log10 KD')
         cbar = fig.colorbar(cax, orientation='vertical')
         cbar.ax.tick_params(labelsize=20)
-        cbar.set_label(r'frequency', fontsize=24)
+        cbar.set_label('frequency', fontsize=24)
         plt.savefig('./fit/smooth_poiss_KD_hist.pdf')
         plt.close()
     
@@ -495,7 +499,7 @@ def test():
         ax.plot(np.linspace(0.5,10.5, 11),hill(true_K[-1], true_s[-1], 1, fl)*1000./c[-1],'w', lw=5)
         cbar = fig.colorbar(cax, orientation='vertical')
         cbar.ax.tick_params(labelsize=20)
-        cbar.set_label(r'-log likelihood', fontsize=24)
+        cbar.set_label('-log likelihood', fontsize=24)
         plt.savefig('./fit/smooth_error'+str(kk)+'.png')
         plt.close()
         
@@ -510,7 +514,7 @@ def test():
         plt.ylabel(r'$K_D$')
         cbar = fig.colorbar(cax, orientation='vertical')
         cbar.ax.tick_params(labelsize=20)
-        cbar.set_label(r'objective', fontsize=24)
+        cbar.set_label('objective', fontsize=24)
         plt.savefig('./fit/smooth_log_p_dist'+str(kk)+'.png')
         plt.close()
         
@@ -520,11 +524,11 @@ def test():
         ax.scatter([np.log10(s)], [np.log10(KD)],s=50, c=[1,0,0])
         ax.scatter([np.log10(true_s[-1])], [np.log10(true_K[-1])],s=50, c=[1,1,1])
         
-        plt.xlabel(r's')
+        plt.xlabel('s')
         plt.ylabel(r'$K_D$')
         cbar = fig.colorbar(cax, orientation='vertical')
         cbar.ax.tick_params(labelsize=20)
-        cbar.set_label(r'objective', fontsize=24)
+        cbar.set_label('objective', fontsize=24)
         plt.savefig('./fit/smooth_p_dist'+str(kk)+'.png')
         plt.close()
         
