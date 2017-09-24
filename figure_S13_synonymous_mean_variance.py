@@ -211,7 +211,7 @@ labeler = Labeler(xpad=.05,ypad=.02,fontsize=10)
 
 print "A1"
 ax = axes[0,0]
-plot_KD_compare(rep1, ax, plt_title = 'replicate 3')
+plot_KD_compare(rep1, ax, plt_title = 'replicate 1')
 labeler.label_subplot(ax,'A')
 ax.set_ylabel('standard deviation, log$_{10} K_D$', labelpad=2)
 ax.set_xlabel(r'average log$_{10} K_D$', labelpad=2)
